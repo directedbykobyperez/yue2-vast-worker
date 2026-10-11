@@ -13,8 +13,9 @@ cd pyworker
 git pull --ff-only || true
 cp /app/yue2_infer-0.1.5-py3-none-any.whl ./ 2>/dev/null || true
 # --no-cache-dir: some hosts serve stale cached wheels whose hashes no longer
-# match the index (fatal "HASHES DO NOT MATCH" otherwise)
-python3 -m pip install -q --no-cache-dir -r requirements.txt
+# match the index (fatal "HASHES DO NOT MATCH" otherwise).
+# --retries/--timeout: host uplinks to PyPI can be flaky (truncated downloads).
+python3 -m pip install -q --no-cache-dir --retries 20 --timeout 120 -r requirements.txt
 mkdir -p /var/log/model
 HF_TOKEN="$HF_TOKEN" BUCKET="$BUCKET" MODEL_PORT=18000 \
   nohup python3 model_server.py > /var/log/model/server.log 2>&1 &
