@@ -2,6 +2,9 @@
 # vast.ai serverless start script: fetch code, install deps, boot model server, run proxy.
 set -e
 command -v ffmpeg >/dev/null || (apt-get update -qq && apt-get install -y -qq ffmpeg)
+echo "[diag] pip config:"; pip config list 2>&1 | head -20
+echo "[diag] pip env:"; env | grep -i 'pip\|index\|proxy\|mirror' || echo none
+echo "[diag] python: $(python3 --version) pip: $(python3 -m pip --version)"
 cd /app
 if [ ! -d pyworker ]; then
   git clone "$PYWORKER_REPO" pyworker
