@@ -9,7 +9,9 @@ fi
 cd pyworker
 git pull --ff-only || true
 cp /app/yue2_infer-0.1.5-py3-none-any.whl ./ 2>/dev/null || true
-python3 -m pip install -q -r requirements.txt
+# --no-cache-dir: some hosts serve stale cached wheels whose hashes no longer
+# match the index (fatal "HASHES DO NOT MATCH" otherwise)
+python3 -m pip install -q --no-cache-dir -r requirements.txt
 mkdir -p /var/log/model
 HF_TOKEN="$HF_TOKEN" BUCKET="$BUCKET" MODEL_PORT=18000 \
   nohup python3 model_server.py > /var/log/model/server.log 2>&1 &
