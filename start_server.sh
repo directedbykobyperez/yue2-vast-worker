@@ -12,10 +12,14 @@ fi
 cd pyworker
 git pull --ff-only || true
 cp /app/yue2_infer-0.1.5-py3-none-any.whl ./ 2>/dev/null || true
-# --no-cache-dir: some hosts serve stale cached wheels whose hashes no longer
-# match the index (fatal "HASHES DO NOT MATCH" otherwise).
-# --retries/--timeout: host uplinks to PyPI can be flaky (truncated downloads).
-python3 -m pip install -q --no-cache-dir --retries 20 --timeout 120 -r requirements.txt
+# vastai/pytorch base may already ship the SDK: skip reinstall when importable
+# (its dep chain hits a corrupting proxy on some hosts: hash mismatches).
+if python3 -c "import vastai.Worker" 2>/dev/null; then
+  echo "[deps] vastai SDK already present, skipping reinstall"
+  python3 -m pip install -q --no-cache-dir --retries 20 --timeout 120 transformers safetensors tiktoken soundfile huggingface-hub
+else
+  python3 -m pip install -q --no-cache-dir --retries 20 --timeout 120 -r requirements.txt
+fi
 mkdir -p /var/log/model
 HF_TOKEN="$HF_TOKEN" BUCKET="$BUCKET" MODEL_PORT=18000 \
   nohup python3 model_server.py > /var/log/model/server.log 2>&1 &
