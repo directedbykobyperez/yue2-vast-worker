@@ -1,0 +1,6 @@
+vastai
+transformers
+safetensors
+tiktoken
+soundfile
+huggingface-hub
